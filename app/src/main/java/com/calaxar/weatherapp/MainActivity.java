@@ -5,11 +5,22 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
+
+    Location[] mLocations = new  Location[]{
+            new Location("Sunbury", -37.581111, 144.713889),
+            new Location("Kyoto", 35.011636, 135.768029),
+            new Location("Glasgow", 55.864237, -4.251806)};
+
+    private ListView locationListView;
+    private LocationAdapter locationAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +28,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        locationListView = (ListView) findViewById(R.id.location_list_view);
+
+        locationAdapter = new LocationAdapter(getApplicationContext(), R.layout.location_row, mLocations);
+
+        if (locationListView != null) {
+            locationListView.setAdapter(locationAdapter);
+        }
+
+        if (locationListView != null) {
+            locationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Snackbar.make(view, ("Location: " + mLocations[i].getlName()), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
