@@ -29,21 +29,6 @@ public class Forecast {
         for (int i = 1; i < 7; i++) {
             weekForecast.add(new dayForecast(25, 15, "sunny"));
         }
-//      try{
-//            currentTemperature = j.getLong("temperature");
-//            currentIcon = j.getString("icon");
-//            JSONArray dayArray = j.getJSONObject("daily").getJSONArray("data");
-//            for (int i = 1; i < 7; i++) {
-//                JSONObject day = dayArray.getJSONObject(i);
-//                int maxTemp = (int) day.getLong("temperatureHigh");
-//                int minTemp = (int) day.getLong("temperatureLow");
-//                String icon = day.getString("icon");
-//                weekForecast.add(new dayForecast(maxTemp, minTemp, icon));
-//            }
-//
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public ArrayList<dayForecast> getWeekForecast() {

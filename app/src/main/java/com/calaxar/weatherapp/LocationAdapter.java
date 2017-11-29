@@ -53,7 +53,7 @@ public class LocationAdapter extends ArrayAdapter<Location> {
         //setting the view to reflect the data we need to display
         nameView.setText(location.getlName());
         coordinateView.setText(Double.toString(location.getlLatitude()) + ", " + Double.toString(location.getlLongitude()));
-        temperatureView.setText(Long.toString(location.getlForecast().getCurrentTemperature()));
+        temperatureView.setText(Long.toString(location.getlForecast().getCurrentTemperature()) + '\u00B0');
 
 
 
