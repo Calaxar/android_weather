@@ -17,11 +17,13 @@ public class Forecast {
     private ArrayList<dayForecast> weekForecast;
     private long currentTemperature;
     private String currentIcon;
+    private String currentSummary;
 
     public Forecast() {
 
         currentTemperature = 20;
         currentIcon = "sunny";
+        currentSummary = "Light rain on Friday, with temperatures falling to 8°C tomorrow.";
         weekForecast = new ArrayList<>();
 
         for (int i = 1; i < 7; i++) {
@@ -55,6 +57,8 @@ public class Forecast {
     public String getCurrentIcon() {
         return currentIcon;
     }
+
+    public String getCurrentSummary() { return currentSummary; }
 
     public class dayForecast {
         private long maxTemp;
