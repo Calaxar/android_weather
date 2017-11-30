@@ -1,6 +1,7 @@
 package com.calaxar.weatherapp;
 
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -140,7 +141,6 @@ public class LocationDetailFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
         //During startup, we should check if there are arguments (data)
         //passed to this Fragment. We know the layout has already been
         //applied to the Fragment so we can safely call the method that
@@ -149,8 +149,11 @@ public class LocationDetailFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             //set the location based on the argument passed in
-            updateLocationDetailView(args.getInt("ARG_POSITION"));
+            updateLocationDetailView(args.getInt(ARG_POSITION, 1));
+            //snackbar reads 0 for args int
         } else if (currentPosition != -1) {
+            Snackbar.make(this.getView(), ("current pos != -1"), Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
             //set the location based on the saved instance state defined during onCreateView
             updateLocationDetailView(currentPosition);
         }
