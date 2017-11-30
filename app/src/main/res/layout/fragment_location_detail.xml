@@ -37,6 +37,7 @@
             <ImageView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:id="@+id/current_icon"
                 android:layout_weight="40"
                 android:scaleType="fitCenter"
                 android:src="@drawable/sunny"/>
@@ -48,6 +49,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="40"
+                android:id="@+id/current_temperature"
                 android:text="XX\u00B0"
                 android:textSize="70sp"
                 android:textAlignment="center"

@@ -14,11 +14,6 @@ import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
 
-    Location[] mLocations = new  Location[]{
-            new Location("Sunbury", -37.581111, 144.713889),
-            new Location("Kyoto", 35.011636, 135.768029),
-            new Location("Glasgow", 55.864237, -4.251806)};
-
     private ListView locationListView;
     private LocationAdapter locationAdapter;
 
@@ -31,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         locationListView = (ListView) findViewById(R.id.location_list_view);
 
-        locationAdapter = new LocationAdapter(getApplicationContext(), R.layout.location_row, mLocations);
+        locationAdapter = new LocationAdapter(getApplicationContext(), R.layout.location_row, LocationsArray.locations);
 
         if (locationListView != null) {
             locationListView.setAdapter(locationAdapter);
@@ -41,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
             locationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Snackbar.make(view, ("Location: " + mLocations[i].getlName()), Snackbar.LENGTH_LONG)
+                    Snackbar.make(view, ("Location: " + LocationsArray.locations[i].getlName()), Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
             });

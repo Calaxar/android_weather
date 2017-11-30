@@ -55,7 +55,8 @@ public class LocationAdapter extends ArrayAdapter<Location> {
         coordinateView.setText(Double.toString(location.getlLatitude()) + ", " + Double.toString(location.getlLongitude()));
         temperatureView.setText(Long.toString(location.getlForecast().getCurrentTemperature()) + '\u00B0');
 
-
+        int resId = mContext.getResources().getIdentifier(location.getlForecast().getCurrentIcon(), "drawable", mContext.getPackageName());
+        iconView.setImageResource(resId);
 
         //returning the row view
         return row;

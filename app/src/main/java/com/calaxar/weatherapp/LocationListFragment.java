@@ -8,9 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class LocationListFragment extends Fragment {
 
 
