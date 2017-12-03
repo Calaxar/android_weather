@@ -165,4 +165,5 @@ public class LocationDetailFragment extends Fragment {
         //Save the current selection for later recreation of this Fragment
         outState.putInt(ARG_POSITION, currentPosition);
     }
+
 }
