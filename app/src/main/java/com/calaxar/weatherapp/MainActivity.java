@@ -1,5 +1,9 @@
 package com.calaxar.weatherapp;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,8 +15,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.ui.PlacePicker;
+
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements  LocationListFragment.OnLocationSelectedListener {
 
+    static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
     FloatingActionButton fab;
 
     @Override
@@ -42,8 +57,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                pickLocation();
             }
         });
     }
@@ -60,6 +74,16 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
 
         //now that the Fragment is prepared, swap it
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment, swapFragment).addToBackStack(null).commit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, this);
+                Log.d("Place", ("onActivityResult: " + place.getLatLng().toString()));
+            }
+        }
     }
 
     @Override
@@ -90,6 +114,17 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         return super.onOptionsItemSelected(item);
     }
 
+    private void pickLocation() {
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+        try {
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesRepairableException g) {
+            g.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException g) {
+            g.printStackTrace();
+        }
+
+    }
 
     public FloatingActionButton getFab() {
         return fab;
