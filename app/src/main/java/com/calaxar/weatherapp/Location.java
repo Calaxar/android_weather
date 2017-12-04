@@ -1,22 +1,16 @@
 package com.calaxar.weatherapp;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 /**
  * Created by Calum on 21/11/2017.
  */
 
 public class Location {
     private String lName;
-    private double lLatitude;
-    private double lLongitude;
+    private String lLatitude;
+    private String lLongitude;
     private Forecast lForecast;
 
-    public Location(String lName, double lLatitude, double lLongitude) {
+    public Location(String lName, String lLatitude, String lLongitude) {
         this.lName = lName;
         this.lLatitude = lLatitude;
         this.lLongitude = lLongitude;
@@ -32,11 +26,11 @@ public class Location {
         return lName;
     }
 
-    public double getlLatitude() {
+    public String getlLatitude() {
         return lLatitude;
     }
 
-    public double getlLongitude() {
+    public String getlLongitude() {
         return lLongitude;
     }
 

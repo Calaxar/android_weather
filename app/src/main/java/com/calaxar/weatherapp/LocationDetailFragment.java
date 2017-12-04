@@ -16,6 +16,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -81,59 +82,59 @@ public class LocationDetailFragment extends Fragment {
         ImageView day6Icon = (ImageView) v.findViewById(R.id.day6_icon);
         TextView day6Min = (TextView) v.findViewById(R.id.day6_min);
 
-        Location[] data = LocationsArray.locations;
+        Location data = MainActivity.locations.get(position);
 
-        int resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getCurrentIcon(), "drawable", this.getContext().getPackageName());
+        int resId = this.getContext().getResources().getIdentifier(data.getlForecast().getCurrentIcon(), "drawable", this.getContext().getPackageName());
         currentIcon.setImageResource(resId);
-        currentTemperature.setText(Long.toString(data[position].getlForecast().getCurrentTemperature()));
-        detailLocation.setText(data[position].getlName());
-        detailSummary.setText(data[position].getlForecast().getCurrentSummary());
+        currentTemperature.setText(Long.toString(data.getlForecast().getCurrentTemperature()));
+        detailLocation.setText(data.getlName());
+        detailSummary.setText(data.getlForecast().getCurrentSummary());
 
         day1.setText(new SimpleDateFormat("EE", Locale.ENGLISH).format(cal.getTime()));
-        day1Max.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(0).getMaxTemp()));
-        resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getWeekForecast().get(0).getWeatherIcon(), "drawable", this.getContext().getPackageName());
+        day1Max.setText(Long.toString(data.getlForecast().getWeekForecast().get(0).getMaxTemp()));
+        resId = this.getContext().getResources().getIdentifier(data.getlForecast().getWeekForecast().get(0).getWeatherIcon(), "drawable", this.getContext().getPackageName());
         day1Icon.setImageResource(resId);
-        day1Min.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(0).getMinTemp()));
+        day1Min.setText(Long.toString(data.getlForecast().getWeekForecast().get(0).getMinTemp()));
         //increment calendar by 1 day
         cal.add(Calendar.DAY_OF_YEAR, 1);
 
         day2.setText(new SimpleDateFormat("EE", Locale.ENGLISH).format(cal.getTime()));
-        day2Max.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(1).getMaxTemp()));
-        resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getWeekForecast().get(1).getWeatherIcon(), "drawable", this.getContext().getPackageName());
+        day2Max.setText(Long.toString(data.getlForecast().getWeekForecast().get(1).getMaxTemp()));
+        resId = this.getContext().getResources().getIdentifier(data.getlForecast().getWeekForecast().get(1).getWeatherIcon(), "drawable", this.getContext().getPackageName());
         day2Icon.setImageResource(resId);
-        day2Min.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(1).getMinTemp()));
+        day2Min.setText(Long.toString(data.getlForecast().getWeekForecast().get(1).getMinTemp()));
         //increment calendar by 1 day
         cal.add(Calendar.DAY_OF_YEAR, 1);
 
         day3.setText(new SimpleDateFormat("EE", Locale.ENGLISH).format(cal.getTime()));
-        day3Max.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(2).getMaxTemp()));
-        resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getWeekForecast().get(2).getWeatherIcon(), "drawable", this.getContext().getPackageName());
+        day3Max.setText(Long.toString(data.getlForecast().getWeekForecast().get(2).getMaxTemp()));
+        resId = this.getContext().getResources().getIdentifier(data.getlForecast().getWeekForecast().get(2).getWeatherIcon(), "drawable", this.getContext().getPackageName());
         day3Icon.setImageResource(resId);
-        day3Min.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(2).getMinTemp()));
+        day3Min.setText(Long.toString(data.getlForecast().getWeekForecast().get(2).getMinTemp()));
         //increment calendar by 1 day
         cal.add(Calendar.DAY_OF_YEAR, 1);
 
         day4.setText(new SimpleDateFormat("EE", Locale.ENGLISH).format(cal.getTime()));
-        day4Max.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(3).getMaxTemp()));
-        resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getWeekForecast().get(3).getWeatherIcon(), "drawable", this.getContext().getPackageName());
+        day4Max.setText(Long.toString(data.getlForecast().getWeekForecast().get(3).getMaxTemp()));
+        resId = this.getContext().getResources().getIdentifier(data.getlForecast().getWeekForecast().get(3).getWeatherIcon(), "drawable", this.getContext().getPackageName());
         day4Icon.setImageResource(resId);
-        day4Min.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(3).getMinTemp()));
+        day4Min.setText(Long.toString(data.getlForecast().getWeekForecast().get(3).getMinTemp()));
         //increment calendar by 1 day
         cal.add(Calendar.DAY_OF_YEAR, 1);
 
         day5.setText(new SimpleDateFormat("EE", Locale.ENGLISH).format(cal.getTime()));
-        day5Max.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(4).getMaxTemp()));
-        resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getWeekForecast().get(4).getWeatherIcon(), "drawable", this.getContext().getPackageName());
+        day5Max.setText(Long.toString(data.getlForecast().getWeekForecast().get(4).getMaxTemp()));
+        resId = this.getContext().getResources().getIdentifier(data.getlForecast().getWeekForecast().get(4).getWeatherIcon(), "drawable", this.getContext().getPackageName());
         day5Icon.setImageResource(resId);
-        day5Min.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(4).getMinTemp()));
+        day5Min.setText(Long.toString(data.getlForecast().getWeekForecast().get(4).getMinTemp()));
         //increment calendar by 1 day
         cal.add(Calendar.DAY_OF_YEAR, 1);
 
         day6.setText(new SimpleDateFormat("EE", Locale.ENGLISH).format(cal.getTime()));
-        day6Max.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(5).getMaxTemp()));
-        resId = this.getContext().getResources().getIdentifier(data[position].getlForecast().getWeekForecast().get(5).getWeatherIcon(), "drawable", this.getContext().getPackageName());
+        day6Max.setText(Long.toString(data.getlForecast().getWeekForecast().get(5).getMaxTemp()));
+        resId = this.getContext().getResources().getIdentifier(data.getlForecast().getWeekForecast().get(5).getWeatherIcon(), "drawable", this.getContext().getPackageName());
         day6Icon.setImageResource(resId);
-        day6Min.setText(Long.toString(data[position].getlForecast().getWeekForecast().get(5).getMinTemp()));
+        day6Min.setText(Long.toString(data.getlForecast().getWeekForecast().get(5).getMinTemp()));
 
         currentPosition = position;
     }

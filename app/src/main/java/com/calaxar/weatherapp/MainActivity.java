@@ -1,6 +1,8 @@
 package com.calaxar.weatherapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -23,12 +25,17 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements  LocationListFragment.OnLocationSelectedListener {
 
     static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
     FloatingActionButton fab;
+    static SharedPreferences sharedPreferences;
+    static List<Location> locations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,20 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        Map<String, ?> keys = sharedPreferences.getAll();
+
+        for (Map.Entry<String, ?> entry : keys.entrySet()) {
+            if (entry.getValue() instanceof HashSet<?>) {
+                String name = entry.getKey();
+                HashSet<String> coord = (HashSet<String>) entry.getValue();
+                String lat = (String) coord.toArray()[0];
+                String lon = (String) coord.toArray()[1];
+                locations.add(new Location(name, lat, lon));
+            }
+
+        }
 
         if (findViewById(R.id.fragment) != null) {
             if(savedInstanceState != null){
@@ -81,7 +102,17 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
-                Log.d("Place", ("onActivityResult: " + place.getLatLng().toString()));
+                Log.d("Place", ("onActivityResult: " + String.format("%.3f%n", place.getLatLng().longitude)));
+
+                HashSet<String> locDetails = new HashSet<>();
+                locDetails.add(String.format("%.3f%n", place.getLatLng().latitude));
+                locDetails.add(String.format("%.3f%n", place.getLatLng().longitude));
+
+                if (sharedPreferences != null) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putStringSet(place.getName().toString(), locDetails);
+                    editor.commit();
+                }
             }
         }
     }

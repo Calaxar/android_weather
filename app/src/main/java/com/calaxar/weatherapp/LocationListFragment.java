@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.List;
+
 public class LocationListFragment extends ListFragment {
 
     public interface OnLocationSelectedListener {
@@ -37,7 +39,8 @@ public class LocationListFragment extends ListFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, LocationsArray.locations));
+        Location[] loco = (Location[]) MainActivity.locations.toArray();
+        setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, loco));
     }
 
     @Override
