@@ -25,6 +25,8 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
     FloatingActionButton fab;
     static SharedPreferences sharedPreferences;
-    static List<Location> locations;
+    static Location locations[];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +46,10 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        locations = new Location[0];
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         Map<String, ?> keys = sharedPreferences.getAll();
+
 
         for (Map.Entry<String, ?> entry : keys.entrySet()) {
             if (entry.getValue() instanceof HashSet<?>) {
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
                 HashSet<String> coord = (HashSet<String>) entry.getValue();
                 String lat = (String) coord.toArray()[0];
                 String lon = (String) coord.toArray()[1];
-                locations.add(new Location(name, lat, lon));
+                locations = addNewLocation(locations, new Location(name, lat, lon));
             }
 
         }
@@ -101,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(data, this);
+                Place place = PlacePicker.getPlace(this, data);
                 Log.d("Place", ("onActivityResult: " + String.format("%.3f%n", place.getLatLng().longitude)));
 
                 HashSet<String> locDetails = new HashSet<>();
@@ -154,7 +158,20 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         } catch (GooglePlayServicesNotAvailableException g) {
             g.printStackTrace();
         }
+    }
 
+    private Location[] addNewLocation(Location[] s, Location l) {
+        if (s.length == 0) {
+            Location[] nLocations = new  Location[1];
+            nLocations[0] = l;
+            return nLocations;
+        }
+        Location[] locations = new Location[s.length + 1];
+        for (int i=0; i<s.length; i++) {
+            locations[i] = s[i];
+        }
+        locations[s.length] = l;
+        return locations;
     }
 
     public FloatingActionButton getFab() {

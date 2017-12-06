@@ -82,7 +82,7 @@ public class LocationDetailFragment extends Fragment {
         ImageView day6Icon = (ImageView) v.findViewById(R.id.day6_icon);
         TextView day6Min = (TextView) v.findViewById(R.id.day6_min);
 
-        Location data = MainActivity.locations.get(position);
+        Location data = MainActivity.locations[position];
 
         int resId = this.getContext().getResources().getIdentifier(data.getlForecast().getCurrentIcon(), "drawable", this.getContext().getPackageName());
         currentIcon.setImageResource(resId);

@@ -39,8 +39,7 @@ public class LocationListFragment extends ListFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Location[] loco = (Location[]) MainActivity.locations.toArray();
-        setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, loco));
+        setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, MainActivity.locations));
     }
 
     @Override
