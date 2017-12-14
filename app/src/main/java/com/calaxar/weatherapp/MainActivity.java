@@ -3,6 +3,8 @@ package com.calaxar.weatherapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,7 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
 
     static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
     static final String[] PREF_KEYS = new String[]{"L0", "L1", "L2", "L3", "L4"};
-    static final HashSet<String> DEFAULT_VALUE = new HashSet<String>(1){};
+    static final String DEFAULT_VALUE = "default";
     static FloatingActionButton fab;
     static LocationListFragment locationListFragment;
     static SharedPreferences sharedPreferences;
@@ -44,9 +47,9 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         nLocations = new ArrayList<>();
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         for (String s:PREF_KEYS) {
-            HashSet<String> value = (HashSet<String>) sharedPreferences.getStringSet(s, DEFAULT_VALUE);
+            String value = sharedPreferences.getString(s, DEFAULT_VALUE);
             if (value != DEFAULT_VALUE) {
-                String[] values = value.toArray(new String[0]);
+                String[] values = value.split("/");
                 String name = values[0];
                 String lat = values[1];
                 String lon = values[2];
@@ -99,8 +102,17 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             if (resultCode == RESULT_OK) {
                 if (sharedPreferences != null) {
                     Place place = PlacePicker.getPlace(this, data);
-                    Log.d("Place", ("onActivityResult: " + String.format("%.3f%n", place.getLatLng().longitude)));
-                    String name = place.getName().toString();
+
+                    String name = place.getAddress().toString();
+                    Geocoder geocoder = new Geocoder(this);
+                    List<Address> addresses;
+                    try {
+                        addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
+                        name = addresses.get(0).getLocality();
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     String lat = String.format("%.3f", place.getLatLng().latitude);
                     String lon = String.format("%.3f", place.getLatLng().longitude);
 
@@ -154,14 +166,11 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     @Override
     protected void onStop() {
         sharedPreferences.edit().clear().commit();
-        HashSet<String> value = new HashSet<String>(3);
+        String value;
         int i = 0;
         for (Location loc:nLocations) {
-            value.add(loc.getlName());
-            value.add(loc.getlLatitude());
-            value.add(loc.getlLongitude());
-            sharedPreferences.edit().putStringSet(PREF_KEYS[i], value).apply();
-            value.clear();
+            value = (loc.getlName() + "/" + loc.getlLatitude() + "/" + loc.getlLongitude());
+            sharedPreferences.edit().putString(PREF_KEYS[i], value).apply();
             i++;
         }
         super.onStop();
@@ -180,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
 
     private String emptyPrefKey() {
         for (String s:PREF_KEYS) {
-            if (sharedPreferences.getStringSet(s, DEFAULT_VALUE) == DEFAULT_VALUE) {
+            if (sharedPreferences.getString(s, DEFAULT_VALUE) == DEFAULT_VALUE) {
                 return s;
             }
         }
