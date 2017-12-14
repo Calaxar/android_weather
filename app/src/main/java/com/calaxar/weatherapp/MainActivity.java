@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity implements  LocationListFragment.OnLocationSelectedListener {
 
@@ -101,33 +104,51 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 if (sharedPreferences != null) {
-                    Place place = PlacePicker.getPlace(this, data);
+                    final Place place = PlacePicker.getPlace(this, data);
+                    final String[] name = new  String[1];
+                    final CountDownLatch latch = new CountDownLatch(1);
 
-                    String name = place.getAddress().toString();
-                    Geocoder geocoder = new Geocoder(this);
-                    List<Address> addresses;
+                    Thread background = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Geocoder geocoder = new Geocoder(getBaseContext());
+                                List<Address> addresses;
+                                String locationName = "";
+                                addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
+                                name[0] = addresses.get(0).getLocality();
+                                latch.countDown();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    background.start();
                     try {
-                        addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
-                        name = addresses.get(0).getLocality();
-                    }catch (IOException e) {
-                        e.printStackTrace();
+                        latch.await();
+                    } catch (InterruptedException i) {
+                        i.printStackTrace();
                     }
 
                     String lat = String.format("%.3f", place.getLatLng().latitude);
                     String lon = String.format("%.3f", place.getLatLng().longitude);
+                    if (name[0] == "") {
+                        Toast.makeText(this, "Location name not processed", Toast.LENGTH_LONG).show();
+                    } else {
+                        if (!atCapacity()) { //if there's room in shared pref key array
+                            //check if location name already exists in list
+                            if (hasLocation(name[0])) {
+                                Toast.makeText(this, "Location already in list", Toast.LENGTH_LONG).show();
+                            } else {
+                                //add location to locations array
+                                Location nLocation = new Location(name[0], lat, lon);
+                                nLocations.add(nLocation);
+                                //update list adapter
+                                ((LocationAdapter)locationListFragment.getListAdapter()).notifyDataSetChanged();
+                            }
+                        } else Toast.makeText(this, "Max Location capacity reached", Toast.LENGTH_LONG).show();
+                    }
 
-                    HashSet<String> locDetails = new HashSet<>();
-                    locDetails.add(name);
-                    locDetails.add(lat);
-                    locDetails.add(lon);
-
-                    if (emptyPrefKey() != null) { //if there's room in shared pref key array
-                        //add location to locations array
-                        Location nLocation = new Location(name, lat, lon);
-                        nLocations.add(nLocation);
-                        //update list adapter
-                        ((LocationAdapter)locationListFragment.getListAdapter()).notifyDataSetChanged();
-                    } else Toast.makeText(this, "Max Location capacity reached", Toast.LENGTH_LONG).show();
                 } else Log.d("issue", "onActivityResult: shared pref == null");
             }
         }
@@ -187,13 +208,16 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         }
     }
 
-    private String emptyPrefKey() {
-        for (String s:PREF_KEYS) {
-            if (sharedPreferences.getString(s, DEFAULT_VALUE) == DEFAULT_VALUE) {
-                return s;
-            }
+    private Boolean atCapacity() {
+        if (((LocationAdapter) locationListFragment.getListAdapter()).mLocations.size() >= PREF_KEYS.length) return true;
+        return false;
+    }
+
+    private Boolean hasLocation(String name) {
+        for (Location l: ((LocationAdapter)locationListFragment.getListAdapter()).mLocations) {
+            if (l.getlName() == name) return true;
         }
-        return null;
+        return false;
     }
 
     public FloatingActionButton getFab() {
