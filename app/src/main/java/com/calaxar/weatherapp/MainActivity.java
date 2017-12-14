@@ -46,15 +46,10 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         for (String s:PREF_KEYS) {
             HashSet<String> value = (HashSet<String>) sharedPreferences.getStringSet(s, DEFAULT_VALUE);
             if (value != DEFAULT_VALUE) {
-//                Iterator<String> iterator = value.iterator();
-//                String name = iterator.next();
-//                String lat = iterator.next();
-//                String lon = iterator.next();
                 String[] values = value.toArray(new String[0]);
                 String name = values[0];
                 String lat = values[1];
                 String lon = values[2];
-                nLocations.add(new Location(name, lat, lon));
                 nLocations.add(new Location(name, lat, lon));
             }
         }
