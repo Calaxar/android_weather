@@ -1,13 +1,21 @@
 package com.calaxar.weatherapp;
 
+import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -82,7 +90,7 @@ public class LocationDetailFragment extends Fragment {
         ImageView day6Icon = (ImageView) v.findViewById(R.id.day6_icon);
         TextView day6Min = (TextView) v.findViewById(R.id.day6_min);
 
-        Location data = MainActivity.locations[position];
+        Location data = MainActivity.nLocations.get(position);
 
         int resId = this.getContext().getResources().getIdentifier(data.getlForecast().getCurrentIcon(), "drawable", this.getContext().getPackageName());
         currentIcon.setImageResource(resId);
@@ -158,6 +166,12 @@ public class LocationDetailFragment extends Fragment {
             //set the location based on the saved instance state defined during onCreateView
             updateLocationDetailView(currentPosition);
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //set new menu which shows delete option
+        inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override

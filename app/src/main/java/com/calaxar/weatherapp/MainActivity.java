@@ -3,41 +3,36 @@ package com.calaxar.weatherapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements  LocationListFragment.OnLocationSelectedListener {
 
     static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
-    FloatingActionButton fab;
+    static final String[] PREF_KEYS = new String[]{"L0", "L1", "L2", "L3", "L4"};
+    static final HashSet<String> DEFAULT_VALUE = new HashSet<String>(1){};
+    static FloatingActionButton fab;
+    static LocationListFragment locationListFragment;
     static SharedPreferences sharedPreferences;
-    static Location locations[];
+    static List<Location> nLocations;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,20 +41,22 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        locations = new Location[0];
+        nLocations = new ArrayList<>();
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        Map<String, ?> keys = sharedPreferences.getAll();
-
-
-        for (Map.Entry<String, ?> entry : keys.entrySet()) {
-            if (entry.getValue() instanceof HashSet<?>) {
-                String name = entry.getKey();
-                HashSet<String> coord = (HashSet<String>) entry.getValue();
-                String lat = (String) coord.toArray()[0];
-                String lon = (String) coord.toArray()[1];
-                locations = addNewLocation(locations, new Location(name, lat, lon));
+        for (String s:PREF_KEYS) {
+            HashSet<String> value = (HashSet<String>) sharedPreferences.getStringSet(s, DEFAULT_VALUE);
+            if (value != DEFAULT_VALUE) {
+//                Iterator<String> iterator = value.iterator();
+//                String name = iterator.next();
+//                String lat = iterator.next();
+//                String lon = iterator.next();
+                String[] values = value.toArray(new String[0]);
+                String name = values[0];
+                String lat = values[1];
+                String lon = values[2];
+                nLocations.add(new Location(name, lat, lon));
+                nLocations.add(new Location(name, lat, lon));
             }
-
         }
 
         if (findViewById(R.id.fragment) != null) {
@@ -68,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             }
 
             //Create an instance of the LocationList Fragment
-            LocationListFragment locationListFragment = new LocationListFragment();
+            locationListFragment = new LocationListFragment();
 
             //In the case this activity was started with special instructions from an Intent,
             //pass the Intent's extras to the fragment as arguments
@@ -98,28 +95,38 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         if (fab != null) fab.setVisibility(View.INVISIBLE);
 
         //now that the Fragment is prepared, swap it
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment, swapFragment).addToBackStack(null).commit();
+        getFragmentManager().beginTransaction().replace(R.id.fragment, swapFragment).addToBackStack(null).commit();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(this, data);
-                Log.d("Place", ("onActivityResult: " + String.format("%.3f%n", place.getLatLng().longitude)));
-
-                HashSet<String> locDetails = new HashSet<>();
-                locDetails.add(String.format("%.3f%n", place.getLatLng().latitude));
-                locDetails.add(String.format("%.3f%n", place.getLatLng().longitude));
-
                 if (sharedPreferences != null) {
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putStringSet(place.getName().toString(), locDetails);
-                    editor.commit();
-                }
+                    Place place = PlacePicker.getPlace(this, data);
+                    Log.d("Place", ("onActivityResult: " + String.format("%.3f%n", place.getLatLng().longitude)));
+                    String name = place.getName().toString();
+                    String lat = String.format("%.3f", place.getLatLng().latitude);
+                    String lon = String.format("%.3f", place.getLatLng().longitude);
+
+                    HashSet<String> locDetails = new HashSet<>();
+                    locDetails.add(name);
+                    locDetails.add(lat);
+                    locDetails.add(lon);
+
+                    if (emptyPrefKey() != null) { //if there's room in shared pref key array
+                        //add location to locations array
+                        Location nLocation = new Location(name, lat, lon);
+                        nLocations.add(nLocation);
+                        //update list adapter
+                        ((LocationAdapter)locationListFragment.getListAdapter()).notifyDataSetChanged();
+                    } else Toast.makeText(this, "Max Location capacity reached", Toast.LENGTH_LONG).show();
+                } else Log.d("issue", "onActivityResult: shared pref == null");
             }
         }
     }
+
+
 
     @Override
     public void onBackPressed() {
@@ -149,6 +156,22 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStop() {
+        sharedPreferences.edit().clear().commit();
+        HashSet<String> value = new HashSet<String>(3);
+        int i = 0;
+        for (Location loc:nLocations) {
+            value.add(loc.getlName());
+            value.add(loc.getlLatitude());
+            value.add(loc.getlLongitude());
+            sharedPreferences.edit().putStringSet(PREF_KEYS[i], value).apply();
+            value.clear();
+            i++;
+        }
+        super.onStop();
+    }
+
     private void pickLocation() {
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
@@ -160,18 +183,13 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         }
     }
 
-    private Location[] addNewLocation(Location[] s, Location l) {
-        if (s.length == 0) {
-            Location[] nLocations = new  Location[1];
-            nLocations[0] = l;
-            return nLocations;
+    private String emptyPrefKey() {
+        for (String s:PREF_KEYS) {
+            if (sharedPreferences.getStringSet(s, DEFAULT_VALUE) == DEFAULT_VALUE) {
+                return s;
+            }
         }
-        Location[] locations = new Location[s.length + 1];
-        for (int i=0; i<s.length; i++) {
-            locations[i] = s[i];
-        }
-        locations[s.length] = l;
-        return locations;
+        return null;
     }
 
     public FloatingActionButton getFab() {

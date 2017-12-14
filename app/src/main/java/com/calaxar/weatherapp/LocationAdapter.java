@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
+
 /**
  * Created by Calum on 29/11/2017.
  */
@@ -18,9 +20,9 @@ public class LocationAdapter extends ArrayAdapter<Location> {
 
     Context mContext;
     int mLayoutResId;
-    Location mLocations[] = null;
+    List<Location> mLocations = null;
 
-    public LocationAdapter(@NonNull Context context, int resource, @NonNull Location[] objects) {
+    public LocationAdapter(@NonNull Context context, int resource, @NonNull List<Location> objects) {
         super(context, resource, objects);
         mContext = context;
         mLayoutResId = resource;
@@ -48,7 +50,7 @@ public class LocationAdapter extends ArrayAdapter<Location> {
         ImageView iconView = (ImageView) row.findViewById(R.id.weatherImageView);
 
         //get the data from the data array
-        Location location = mLocations[position];
+        Location location = mLocations.get(position);
 
         //setting the view to reflect the data we need to display
         nameView.setText(location.getlName());

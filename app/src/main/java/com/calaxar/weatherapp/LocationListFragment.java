@@ -1,15 +1,20 @@
 package com.calaxar.weatherapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.List;
@@ -39,18 +44,43 @@ public class LocationListFragment extends ListFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, MainActivity.locations));
+        setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, MainActivity.nLocations));
+        MainActivity.fab.show();
+        }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_location_list, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        getListView().setLongClickable(true);
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+                dialogBuilder.setTitle("Delete");
+                dialogBuilder.setMessage("Would you like to delete this location?");
+                dialogBuilder.setPositiveButton("No", null);
+                dialogBuilder.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        MainActivity.nLocations.remove(position);
+                        ((LocationAdapter) getListAdapter()).notifyDataSetChanged();
+                    }
+                });
+                dialogBuilder.create().show();
+                return true;
+            }
+        });
+        super.onResume();
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         //Notify the parent of the selected item
         callback.onLocationSelected(position);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_location_list, container, false);
     }
 }
