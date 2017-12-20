@@ -46,7 +46,14 @@ public class LocationListFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, MainActivity.nLocations));
         MainActivity.fab.show();
-        }
+    }
+
+    @Override
+    public void onStart() {
+        MainActivity.mShowVisible = true;
+        getActivity().invalidateOptionsMenu();
+        super.onStart();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

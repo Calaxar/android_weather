@@ -17,27 +17,38 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity implements  LocationListFragment.OnLocationSelectedListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
     static final String[] PREF_KEYS = new String[]{"L0", "L1", "L2", "L3", "L4"};
     static final String DEFAULT_VALUE = "default";
+    static boolean mShowVisible = true;
     static FloatingActionButton fab;
     static LocationListFragment locationListFragment;
     static SharedPreferences sharedPreferences;
     static List<Location> nLocations;
+    static String url = "https://api.darksky.net/" + APIKeys.weatherAPI + "/";
 
 
     @Override
@@ -51,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         for (String s:PREF_KEYS) {
             String value = sharedPreferences.getString(s, DEFAULT_VALUE);
-            if (value != DEFAULT_VALUE) {
+            if (!Objects.equals(value, DEFAULT_VALUE)) {
                 String[] values = value.split("/");
                 String name = values[0];
                 String lat = values[1];
@@ -73,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             locationListFragment.setArguments(getIntent().getExtras());
 
             //Ask the Fragment manager to add it to the XML Fragment
-            getFragmentManager().beginTransaction().add(R.id.fragment, locationListFragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.fragment, locationListFragment).commit();
         }
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -163,6 +174,14 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_refresh).setVisible(mShowVisible);
+        menu.findItem(R.id.action_settings).setVisible(mShowVisible);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -219,6 +238,51 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         }
         return false;
     }
+
+    public String makeServiceCall(String reqUrl) {
+        String response = null;
+
+        try {
+            URL url = new URL(reqUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            //read the response
+            InputStream in = new BufferedInputStream(connection.getInputStream());
+            response = convertStreamToString(in);
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "MalformedURLException: " + e.getMessage());
+        } catch (ProtocolException e) {
+            Log.e(TAG, "ProtocolException: " + e.getMessage());
+        } catch (IOException e) {
+            Log.e(TAG, "IOException: " + e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    private String convertStreamToString(InputStream is) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
+
 
     public FloatingActionButton getFab() {
         return fab;

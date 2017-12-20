@@ -166,6 +166,9 @@ public class LocationDetailFragment extends Fragment {
             //set the location based on the saved instance state defined during onCreateView
             updateLocationDetailView(currentPosition);
         }
+
+        MainActivity.mShowVisible = false;
+        getActivity().invalidateOptionsMenu();
     }
 
     @Override
