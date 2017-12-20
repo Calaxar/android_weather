@@ -49,6 +49,18 @@ public class Forecast {
 
     public String getCurrentSummary() { return currentSummary; }
 
+    public void setCurrentTemperature(long currentTemperature) {
+        this.currentTemperature = currentTemperature;
+    }
+
+    public void setCurrentIcon(String currentIcon) {
+        this.currentIcon = currentIcon;
+    }
+
+    public void setCurrentSummary(String currentSummary) {
+        this.currentSummary = currentSummary;
+    }
+
     public class dayForecast {
         private long maxTemp;
         private long minTemp;

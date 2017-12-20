@@ -20,7 +20,7 @@ public class LocationAdapter extends ArrayAdapter<Location> {
 
     Context mContext;
     int mLayoutResId;
-    List<Location> mLocations = null;
+    static List<Location> mLocations = null;
 
     public LocationAdapter(@NonNull Context context, int resource, @NonNull List<Location> objects) {
         super(context, resource, objects);

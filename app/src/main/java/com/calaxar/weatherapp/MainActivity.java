@@ -1,12 +1,13 @@
 package com.calaxar.weatherapp;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +33,9 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +52,10 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     static LocationListFragment locationListFragment;
     static SharedPreferences sharedPreferences;
     static List<Location> nLocations;
-    static String url = "https://api.darksky.net/" + APIKeys.weatherAPI + "/";
+    static String url = "https://api.darksky.net/forecast/" + APIKeys.weatherAPI + "/";
+
+    private ProgressDialog pDialog;
+
 
 
     @Override
@@ -199,6 +206,9 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         if (id == R.id.action_settings) {
             return true;
         }
+        if (id == R.id.action_refresh) {
+            new GetWeather().execute();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -213,7 +223,75 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             sharedPreferences.edit().putString(PREF_KEYS[i], value).apply();
             i++;
         }
+
+        if (pDialog.isShowing()) pDialog.dismiss();
+
         super.onStop();
+    }
+
+    private class GetWeather extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //showing progress dialog
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Please wait...");
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            HttpHandler sh = new HttpHandler();
+            String jsonStr;
+
+            for (Location l:LocationAdapter.mLocations) {
+                // Making a request to url and getting response
+                jsonStr = sh.makeServiceCall(url + l.getlLatitude() + "," + l.getlLongitude() + "?exclude=minutely,hourly&units=ca");
+
+                if (jsonStr != null) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(jsonStr);
+
+                        Long temp = (jsonObject.getJSONObject("currently").getLong("temperature"));
+                        l.getlForecast().setCurrentTemperature(temp);
+                    } catch (final JSONException e) {
+                        Log.e(TAG, "Json parsing error: " + e.getMessage());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.v(TAG, "Json parsing error" + e.getMessage());
+                            }
+                        });
+                    }
+                } else {
+                    Log.e(TAG, "Couldn't get json from server");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Couldn't get json from server. Check LogCat for possible errors!", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //dismiss the progress dialog
+            if (pDialog.isShowing()) pDialog.dismiss();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //update list adapter
+                    ((LocationAdapter)locationListFragment.getListAdapter()).notifyDataSetChanged();
+                }
+            });
+        }
     }
 
     private void pickLocation() {
@@ -238,51 +316,6 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         }
         return false;
     }
-
-    public String makeServiceCall(String reqUrl) {
-        String response = null;
-
-        try {
-            URL url = new URL(reqUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            //read the response
-            InputStream in = new BufferedInputStream(connection.getInputStream());
-            response = convertStreamToString(in);
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "MalformedURLException: " + e.getMessage());
-        } catch (ProtocolException e) {
-            Log.e(TAG, "ProtocolException: " + e.getMessage());
-        } catch (IOException e) {
-            Log.e(TAG, "IOException: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e(TAG, "Exception: " + e.getMessage());
-        }
-
-        return response;
-    }
-
-    private String convertStreamToString(InputStream is) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append('\n');
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return sb.toString();
-    }
-
 
     public FloatingActionButton getFab() {
         return fab;
