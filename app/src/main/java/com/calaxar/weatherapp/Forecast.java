@@ -1,5 +1,7 @@
 package com.calaxar.weatherapp;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static android.content.ContentValues.TAG;
 
 
 /**
@@ -32,6 +36,21 @@ public class Forecast {
 
         for (int i = 0; i < 6; i++) {
             weekForecast.add(new dayForecast(25, 15, icons.get("partly-cloudy-day")));
+        }
+    }
+
+    public Forecast(JSONObject jsonObject) {
+        try {
+            currentTemperature = jsonObject.getJSONObject("currently").getLong("temperature");
+            currentIcon = icons.get("clear-day");
+            currentSummary = "Light rain on Friday, with temperatures falling to 8°C tomorrow.";
+
+            weekForecast = new ArrayList<>();
+            for (int i = 0; i < 6; i++) {
+                weekForecast.add(new dayForecast(25, 15, icons.get("partly-cloudy-day")));
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "Json parsing error: " + e.getMessage());
         }
     }
 

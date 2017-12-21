@@ -230,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     }
 
     private class GetWeather extends AsyncTask<Void, Void, Void> {
+        private final ArrayList<Location> newLocations = new ArrayList<>(LocationAdapter.mLocations.size());
 
         @Override
         protected void onPreExecute() {
@@ -254,8 +255,10 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
                     try {
                         JSONObject jsonObject = new JSONObject(jsonStr);
 
-                        Long temp = (jsonObject.getJSONObject("currently").getLong("temperature"));
-                        l.getlForecast().setCurrentTemperature(temp);
+                        newLocations.add(new Location(l.getlName(), l.getlLatitude(), l.getlLongitude(), jsonObject));
+
+//                        Long temp = jsonObject.getJSONObject("currently").getLong("temperature");
+//                        l.getlForecast().setCurrentTemperature(temp);
                     } catch (final JSONException e) {
                         Log.e(TAG, "Json parsing error: " + e.getMessage());
                         runOnUiThread(new Runnable() {
@@ -288,6 +291,8 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
                 @Override
                 public void run() {
                     //update list adapter
+                    ((LocationAdapter)locationListFragment.getListAdapter()).clear();
+                    ((LocationAdapter)locationListFragment.getListAdapter()).addAll(newLocations);
                     ((LocationAdapter)locationListFragment.getListAdapter()).notifyDataSetChanged();
                 }
             });

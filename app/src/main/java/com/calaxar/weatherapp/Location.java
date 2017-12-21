@@ -1,5 +1,7 @@
 package com.calaxar.weatherapp;
 
+import org.json.JSONObject;
+
 /**
  * Created by Calum on 21/11/2017.
  */
@@ -15,6 +17,13 @@ public class Location {
         this.lLatitude = lLatitude;
         this.lLongitude = lLongitude;
         lForecast = new Forecast();
+    }
+
+    public Location(String lName, String lLatitude, String lLongitude, JSONObject jsonObject) {
+        this.lName = lName;
+        this.lLatitude = lLatitude;
+        this.lLongitude = lLongitude;
+        lForecast = new Forecast(jsonObject);
     }
 
     public void refreshForecast() {
