@@ -42,12 +42,19 @@ public class Forecast {
     public Forecast(JSONObject jsonObject) {
         try {
             currentTemperature = jsonObject.getJSONObject("currently").getLong("temperature");
-            currentIcon = icons.get("clear-day");
-            currentSummary = "Light rain on Friday, with temperatures falling to 8°C tomorrow.";
+            currentIcon = icons.get(jsonObject.getJSONObject("currently").getString("icon"));
+            currentSummary = jsonObject.getJSONObject("daily").getString("summary");
 
             weekForecast = new ArrayList<>();
+            JSONArray data = jsonObject.getJSONObject("daily").getJSONArray("data");
+            long wMax;
+            long wMin;
+            String wIcon;
             for (int i = 0; i < 6; i++) {
-                weekForecast.add(new dayForecast(25, 15, icons.get("partly-cloudy-day")));
+                wMax = data.getJSONObject(i).getLong("temperatureMax");
+                wMin = data.getJSONObject(i).getLong("temperatureMin");
+                wIcon = data.getJSONObject(i).getString("icon");
+                weekForecast.add(new dayForecast(wMax, wMin, icons.get(wIcon)));
             }
         } catch (JSONException e) {
             Log.e(TAG, "Json parsing error: " + e.getMessage());
@@ -85,7 +92,7 @@ public class Forecast {
         private long minTemp;
         private String weatherIcon;
 
-        public dayForecast(int maxTemp, int minTemp, String weatherIcon) {
+        public dayForecast(long maxTemp, long minTemp, String weatherIcon) {
             this.maxTemp = maxTemp;
             this.minTemp = minTemp;
             this.weatherIcon = weatherIcon;
