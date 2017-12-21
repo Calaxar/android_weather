@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
 
     private static final String TAG = MainActivity.class.getSimpleName();
     static final int PLACE_PICKER_REQUEST = 1; //request code for place picker
-    static final String[] PREF_KEYS = new String[]{"L0", "L1", "L2", "L3", "L4"};
+    static final String[] PREF_KEYS = new String[]{"L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9"};
     static final String DEFAULT_VALUE = "default";
     static boolean mShowVisible = true;
     static FloatingActionButton fab;
@@ -101,6 +101,12 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
                 pickLocation();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new GetWeather().execute();
     }
 
     @Override
@@ -224,7 +230,9 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             i++;
         }
 
-        if (pDialog.isShowing()) pDialog.dismiss();
+        if (pDialog != null) {
+            if (pDialog.isShowing()) pDialog.dismiss();
+        }
 
         super.onStop();
     }
@@ -308,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         } catch (GooglePlayServicesNotAvailableException g) {
             g.printStackTrace();
         }
+        new GetWeather().execute();
     }
 
     private Boolean atCapacity() {
