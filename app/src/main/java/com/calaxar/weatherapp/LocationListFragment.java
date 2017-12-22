@@ -44,14 +44,16 @@ public class LocationListFragment extends ListFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        //set new adapter containing locations stored in nLocations from sharedPreferences
         setListAdapter(new LocationAdapter(getActivity(), R.layout.location_row, MainActivity.nLocations));
+        //show fab for adding new locations
         MainActivity.fab.show();
     }
 
     @Override
     public void onStart() {
-        MainActivity.mShowVisible = true;
-        getActivity().invalidateOptionsMenu();
+        MainActivity.mShowVisible = true; //make settings and refresh buttons visible to user
+        getActivity().invalidateOptionsMenu(); //refresh options menu
         super.onStart();
     }
 
@@ -63,6 +65,7 @@ public class LocationListFragment extends ListFragment {
 
     @Override
     public void onResume() {
+        //set long click listener to delete locations from list
         getListView().setLongClickable(true);
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override

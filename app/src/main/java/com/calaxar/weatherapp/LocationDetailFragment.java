@@ -90,7 +90,7 @@ public class LocationDetailFragment extends Fragment {
         ImageView day6Icon = (ImageView) v.findViewById(R.id.day6_icon);
         TextView day6Min = (TextView) v.findViewById(R.id.day6_min);
 
-        Location data = MainActivity.nLocations.get(position);
+        Location data = MainActivity.nLocations.get(position); //get reference to location data to update views
 
         int resId = this.getContext().getResources().getIdentifier(data.getlForecast().getCurrentIcon(), "drawable", this.getContext().getPackageName());
         currentIcon.setImageResource(resId);
@@ -159,14 +159,13 @@ public class LocationDetailFragment extends Fragment {
         if (args != null) {
             //set the location based on the argument passed in
             updateLocationDetailView(args.getInt(ARG_POSITION, 1));
-            //snackbar reads 0 for args int
         } else if (currentPosition != -1) {
             Snackbar.make(this.getView(), ("current pos != -1"), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             //set the location based on the saved instance state defined during onCreateView
-            updateLocationDetailView(currentPosition);
         }
 
+        //make settings and refresh buttons invisible
         MainActivity.mShowVisible = false;
         getActivity().invalidateOptionsMenu();
     }

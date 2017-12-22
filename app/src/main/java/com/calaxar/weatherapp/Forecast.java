@@ -22,13 +22,13 @@ public class Forecast {
 
 
     public static final HashMap<String, String> icons = createMap();
-    private ArrayList<dayForecast> weekForecast;
+    private ArrayList<dayForecast> weekForecast; //stores weather data for next 7 days
     private long currentTemperature;
     private String currentIcon;
     private String currentSummary;
 
     public Forecast() {
-
+        //dummy text forecast data for later replacement
         currentTemperature = 20;
         currentIcon = icons.get("clear-day");
         currentSummary = "Light rain on Friday, with temperatures falling to 8°C tomorrow.";
@@ -40,6 +40,7 @@ public class Forecast {
     }
 
     public Forecast(JSONObject jsonObject) {
+        //uses JSON object to assign values as required
         try {
             currentTemperature = jsonObject.getJSONObject("currently").getLong("temperature");
             currentIcon = icons.get(jsonObject.getJSONObject("currently").getString("icon"));
@@ -75,19 +76,7 @@ public class Forecast {
 
     public String getCurrentSummary() { return currentSummary; }
 
-    public void setCurrentTemperature(long currentTemperature) {
-        this.currentTemperature = currentTemperature;
-    }
-
-    public void setCurrentIcon(String currentIcon) {
-        this.currentIcon = currentIcon;
-    }
-
-    public void setCurrentSummary(String currentSummary) {
-        this.currentSummary = currentSummary;
-    }
-
-    public class dayForecast {
+    public class dayForecast { //used to store data for a single day
         private long maxTemp;
         private long minTemp;
         private String weatherIcon;
@@ -113,7 +102,8 @@ public class Forecast {
 
     private static HashMap<String, String> createMap()
     {
-        HashMap<String,String> myMap = new HashMap<String,String>();
+        //reads text provided by Dark Sky API, and returns associated drawable name
+        HashMap<String,String> myMap = new HashMap<>();
         myMap.put("clear-day", "clear_day");
         myMap.put("clear-night", "clear_night");
         myMap.put("rain", "rain");

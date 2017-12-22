@@ -13,6 +13,7 @@ public class Location {
     private Forecast lForecast;
 
     public Location(String lName, String lLatitude, String lLongitude) {
+        //creates initial dummy text Location object to be later replaced with JSON infused Location
         this.lName = lName;
         this.lLatitude = lLatitude;
         this.lLongitude = lLongitude;
@@ -20,15 +21,11 @@ public class Location {
     }
 
     public Location(String lName, String lLatitude, String lLongitude, JSONObject jsonObject) {
+        //creates Location and give JSON data to lForecast to assign values as required
         this.lName = lName;
         this.lLatitude = lLatitude;
         this.lLongitude = lLongitude;
         lForecast = new Forecast(jsonObject);
-    }
-
-    public void refreshForecast() {
-        int currentTime = (int) (System.currentTimeMillis() / 1000L);
-        lForecast = new Forecast();
     }
 
     public String getlName() {

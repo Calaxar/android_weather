@@ -8,7 +8,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,15 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -65,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Get Location name, latitude and longitude from shared preferences,
+        //then use them to create an initial Location object, and then add it to nLocations list
         nLocations = new ArrayList<>();
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         for (String s:PREF_KEYS) {
@@ -94,7 +87,8 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             getFragmentManager().beginTransaction().replace(R.id.fragment, locationListFragment).commit();
         }
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab); //Get reference to ListFragment 'floating action button'
+        //When fab is pressed, user then picks location using PlacePicker api to be added as Location
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     @Override
     protected void onResume() {
         super.onResume();
+        //refresh weather data for locations upon refresh
         new GetWeather().execute();
     }
 
@@ -117,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         args.putInt(LocationDetailFragment.ARG_POSITION, position);
         swapFragment.setArguments(args);
 
+        //make sure fab does not show in next fragment
         if (fab != null) fab.setVisibility(View.INVISIBLE);
 
         //now that the Fragment is prepared, swap it
@@ -129,19 +125,20 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             if (resultCode == RESULT_OK) {
                 if (sharedPreferences != null) {
                     final Place place = PlacePicker.getPlace(this, data);
-                    final String[] name = new  String[1];
-                    final CountDownLatch latch = new CountDownLatch(1);
+                    final String[] name = new  String[1]; //final array lengths can't be changed, but values can
+                    final CountDownLatch latch = new CountDownLatch(1); //to keep threads synchronised
 
                     Thread background = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
+                                //Get locality name from Location coordinates using Geocoder
                                 Geocoder geocoder = new Geocoder(getBaseContext());
                                 List<Address> addresses;
                                 String locationName = "";
                                 addresses = geocoder.getFromLocation(place.getLatLng().latitude, place.getLatLng().longitude, 1);
                                 name[0] = addresses.get(0).getLocality();
-                                latch.countDown();
+                                latch.countDown(); //allow main thread to resume
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -149,11 +146,12 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
                     });
                     background.start();
                     try {
-                        latch.await();
+                        latch.await(); //wait for latch to count
                     } catch (InterruptedException i) {
                         i.printStackTrace();
                     }
 
+                    //get coordinates to 3 decimal places
                     String lat = String.format("%.3f", place.getLatLng().latitude);
                     String lon = String.format("%.3f", place.getLatLng().longitude);
                     if (name[0] == "") {
@@ -183,11 +181,13 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        //assuming back press will arrive at locationListFragment, show fab
         if (fab != null) fab.setVisibility(View.VISIBLE);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        //show or hide action buttons depending upon mShowVisible value (determined by fragment classes)
         menu.findItem(R.id.action_refresh).setVisible(mShowVisible);
         menu.findItem(R.id.action_settings).setVisible(mShowVisible);
 
@@ -208,11 +208,12 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            //can implement settings option in future
             return true;
         }
         if (id == R.id.action_refresh) {
+            //get weather data values from Dark Sky API to update Location values
             new GetWeather().execute();
         }
 
@@ -221,16 +222,18 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
 
     @Override
     protected void onStop() {
-        sharedPreferences.edit().clear().commit();
+        //onStop, save all Location name, lat, lon as concatenated string to shared preferences using PREF_KEY values
+        sharedPreferences.edit().clear().commit(); //clear previous saved values from sharedPref
         String value;
         int i = 0;
         for (Location loc:nLocations) {
-            value = (loc.getlName() + "/" + loc.getlLatitude() + "/" + loc.getlLongitude());
-            sharedPreferences.edit().putString(PREF_KEYS[i], value).apply();
+            value = (loc.getlName() + "/" + loc.getlLatitude() + "/" + loc.getlLongitude()); //concatenated string to be saved
+            sharedPreferences.edit().putString(PREF_KEYS[i], value).apply(); //add key value pair to sharedPref
             i++;
         }
 
         if (pDialog != null) {
+            //make sure dialog box doesn't persist after closing if it still exists
             if (pDialog.isShowing()) pDialog.dismiss();
         }
 
@@ -256,17 +259,15 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             String jsonStr;
 
             for (Location l:LocationAdapter.mLocations) {
-                // Making a request to url and getting response
+                // Making a request to url and getting response as JSON-convertible string
                 jsonStr = sh.makeServiceCall(url + l.getlLatitude() + "," + l.getlLongitude() + "?exclude=minutely,hourly&units=ca");
 
                 if (jsonStr != null) {
                     try {
-                        JSONObject jsonObject = new JSONObject(jsonStr);
+                        JSONObject jsonObject = new JSONObject(jsonStr); // convert string to JSON object
 
                         newLocations.add(new Location(l.getlName(), l.getlLatitude(), l.getlLongitude(), jsonObject));
 
-//                        Long temp = jsonObject.getJSONObject("currently").getLong("temperature");
-//                        l.getlForecast().setCurrentTemperature(temp);
                     } catch (final JSONException e) {
                         Log.e(TAG, "Json parsing error: " + e.getMessage());
                         runOnUiThread(new Runnable() {
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //update list adapter
+                    //replace adapter list with newLocations and update listView
                     ((LocationAdapter)locationListFragment.getListAdapter()).clear();
                     ((LocationAdapter)locationListFragment.getListAdapter()).addAll(newLocations);
                     ((LocationAdapter)locationListFragment.getListAdapter()).notifyDataSetChanged();
@@ -308,14 +309,17 @@ public class MainActivity extends AppCompatActivity implements  LocationListFrag
     }
 
     private void pickLocation() {
+        //set up placePicker intent
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
+            //get user to choose location from placePicker to add to listView upon result
             startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
         } catch (GooglePlayServicesRepairableException g) {
             g.printStackTrace();
         } catch (GooglePlayServicesNotAvailableException g) {
             g.printStackTrace();
         }
+        //update weather data fo Locations, include newly added Location
         new GetWeather().execute();
     }
 

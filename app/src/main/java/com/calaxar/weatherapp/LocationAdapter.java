@@ -22,6 +22,7 @@ public class LocationAdapter extends ArrayAdapter<Location> {
     int mLayoutResId;
     static List<Location> mLocations = null;
 
+    //make sure to override correct constructor, do not initialise adapter with array of locations, as it won't be able to be updated later
     public LocationAdapter(@NonNull Context context, int resource, @NonNull List<Location> objects) {
         super(context, resource, objects);
         mContext = context;
