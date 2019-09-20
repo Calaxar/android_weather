@@ -2,7 +2,7 @@
 Android Weather App. Uses Dark Sky API and Google Maps & Places API
 
 ## App Images
-![Location List](https://github.com/Calaxar/android_weather/blob/master/AppImages/location_list.jpg =250x400) 
+![Location List](https://github.com/Calaxar/android_weather/blob/master/AppImages/location_list.jpg) 
 
 ![Google API Implementation](https://github.com/Calaxar/android_weather/blob/master/AppImages/google_API.jpg) 
 
